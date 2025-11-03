@@ -1,37 +1,51 @@
 package com.pi.energyflow.service;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 
 @Service
 public class EmailService {
+    
+    @Value("${sendgrid.api.key}")
+    private String sendgridApiKey;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${sendgrid.from.email}")
+    private String fromEmail;
 
-    public boolean enviarEmailHtml(String destinatario, String assunto, String corpoHtml) {
+    @Value("${sendgrid.from.name}")
+    private String fromName;
+
+    public void enviarEmailHtml(String destinatario, String assunto, String corpoHtml) {
+        Email from = new Email(fromEmail, fromName);
+        Email to = new Email(destinatario);
+        Content content = new Content("text/html", corpoHtml);
+        Mail mail = new Mail(from, assunto, to, content);
+
+        SendGrid sg = new SendGrid(sendgridApiKey);	
+        Request request = new Request();
+
         try {
-            MimeMessage mensagem = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensagem, true, "UTF-8");
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
 
-            helper.setFrom("energyflow.plataform@gmail.com", "EnergyFlow");
-            helper.setTo(destinatario);
-            helper.setSubject(assunto);
-            helper.setText(corpoHtml, true);
+            if (response.getStatusCode() >= 400) {
+                throw new RuntimeException("Erro ao enviar e-mail: " + response.getBody());
+            }
 
-            mailSender.send(mensagem);
-            return true; 
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            System.err.println("Erro ao enviar email para " + destinatario + ": " + e.getMessage());
-            return false; 
+        } catch (IOException ex) {
+            throw new RuntimeException("Erro ao enviar e-mail: " + ex.getMessage());
         }
     }
-
 }
