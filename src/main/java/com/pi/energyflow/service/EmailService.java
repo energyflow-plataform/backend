@@ -1,5 +1,7 @@
 package com.pi.energyflow.service;
 
+import java.io.UnsupportedEncodingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,18 +16,22 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void enviarEmailHtml(String destinatario, String assunto, String corpoHtml) {
+    public boolean enviarEmailHtml(String destinatario, String assunto, String corpoHtml) {
         try {
             MimeMessage mensagem = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mensagem, true, "UTF-8");
 
+            helper.setFrom("energyflow.plataform@gmail.com", "EnergyFlow");
             helper.setTo(destinatario);
             helper.setSubject(assunto);
             helper.setText(corpoHtml, true);
 
             mailSender.send(mensagem);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Erro ao enviar e-mail: " + e.getMessage());
+            return true; 
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            System.err.println("Erro ao enviar email para " + destinatario + ": " + e.getMessage());
+            return false; 
         }
     }
+
 }
