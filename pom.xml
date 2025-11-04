@@ -47,11 +47,6 @@
 		    <groupId>com.sendgrid</groupId>
 		    <artifactId>sendgrid-java</artifactId>
 		</dependency>
-		<!-- Dependência para envio de e-mails-->
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
 		<!-- Dependência para leitura de variáveis de ambiente-->
 		<dependency>
 			<groupId>io.github.cdimascio</groupId>
