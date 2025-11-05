@@ -51,6 +51,7 @@ public class UsuarioController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
+	@Operation(summary = "Solicita recuperação de senha", description = "Envia um e-mail para o usuário com instruções para recuperação de senha.")
 	@PostMapping("/senha/recuperar")
 	public ResponseEntity<String> solicitarRecuperacao(@RequestBody Map<String, String> request) {
 	    String email = request.get("email");
@@ -60,6 +61,7 @@ public class UsuarioController {
 	        : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
 	}
 
+	@Operation(summary = "Redefine a senha do usuário", description = "Permite ao usuário redefinir sua senha usando um token de recuperação.")
 	@PostMapping("/senha/resetar")
 	public ResponseEntity<String> resetarSenha(@RequestBody Map<String, String> request) {
 	    String token = request.get("token");
